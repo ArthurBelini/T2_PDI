@@ -7,10 +7,12 @@ import numpy as np
 ## Inicialização
 
 # Tratamento da passagem de argumentos
+i_default = 'dipxe.tif'
 n_default = 5
 k_default = 4.5
 s_default = 3
 parser = argparse.ArgumentParser(description='Filtragem High-Boost')
+parser.add_argument('-i', '--image_path', type=str, default=i_default, help=f'Caminho da imagem utilizada (default: {i_default})')
 parser.add_argument('-c', '--use_conv', action='store_true', default=False, help=f'Utiliza convolucao como metodo de borramento (default: False)')
 parser.add_argument('-n', '--kernel_size', type=int, default=n_default, help=f'Tamanho da matriz de convolucao (default: {n_default})')
 parser.add_argument('-k', '--weight', type=float, default=k_default, help=f'Peso da filtragem high-boost ou k (default: {k_default})')
@@ -20,13 +22,13 @@ use_conv = args.use_conv
 kernel_size = args.kernel_size
 weight = args.weight
 sigma = args.sigma
-
-image_path = 'dipxe.tif'  # Caminho da imagem de entrada
+image_path = args.image_path
 
 
 ## Passo 1: blur = conv(original)
 
 original = cv2.imread(image_path)  # imagem <- dados da imagem em tons de cinza
+cv2.imwrite('ori.tif', original)  # Salva imagem borrada
 
 if kernel_size > 1:
     if use_conv:
