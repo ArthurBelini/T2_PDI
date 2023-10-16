@@ -27,8 +27,8 @@ image_path = args.image_path
 
 ## Passo 1: blur = conv(original)
 
-original = cv2.imread(image_path)  # imagem <- dados da imagem em tons de cinza
-cv2.imwrite('ori.tif', original)  # Salva imagem borrada
+original = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)  # imagem <- dados da imagem em tons de cinza
+cv2.imshow('Original Image', original)  # Mostra imagem original
 
 if kernel_size > 1:
     if use_conv:
@@ -48,32 +48,32 @@ else:
 
     exit(1)
 
-cv2.imwrite('blur.tif', blur)  # Salva imagem borrada
+# Salva e mostra imagem borrada
+cv2.imwrite('blur.tif', blur)  
+cv2.imshow('Blurred Image', blur)
 
 
 ## Passo 2: mask = original - blur
 
 # Calcula diferenca entre original e borrada (mask)
-mask = cv2.subtract(original, blur)
-
-cv2.imwrite('mask.tif', mask)  # Salva diferenca entre original e borrada
+mask = cv2.subtract(original.astype(np.int16), blur.astype(np.int16))
+ 
+# Salva e mostra unsharp mask
+cv2.imwrite('mask.tif', np.clip(np.add(mask, 128), 0, 255).astype(np.uint8)) 
+cv2.imshow('Unsharp Mask', np.clip(np.add(mask, 128), 0, 255).astype(np.uint8))
 
 
 ## Passo 3: new = original + weight * mask 
 
 # Calcula imagem com filtragem high-boost
-new = cv2.multiply(mask, np.array([weight]))
-new = cv2.add(original, new)
-np.clip(new, 0, 255).astype(np.uint8)
+new = cv2.multiply(mask, weight)
+new = cv2.add(original.astype(np.int16), new)
+new = np.clip(new, 0, 255).astype(np.uint8)
 
-cv2.imwrite('new.tif', new)  # Salva imagem com filtragem high-boost
-
-
-## Mostrar imagens
-
-cv2.imshow('Original Image', original)
-cv2.imshow('Blurred Image', blur)
-cv2.imshow('Difference Image', mask)
+# Salva e mostra imagem com filtragem high-boost
+cv2.imwrite('new.tif', new)  
 cv2.imshow('High-Boost Image', new)
+
+# Espera finalizacao
 cv2.waitKey(0)
 cv2.destroyAllWindows()
